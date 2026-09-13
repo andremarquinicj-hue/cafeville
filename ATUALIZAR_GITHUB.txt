@@ -1,0 +1,17 @@
+CAFÉVILLE v0.3 — COMO ATUALIZAR
+
+1) Extraia o ZIP.
+2) Abra seu repositório cafeville no GitHub.
+3) Substitua o conteúdo atual pelos arquivos desta versão.
+4) Faça Commit changes.
+5) A Vercel fará o deploy automaticamente.
+
+IMPORTANTE:
+- Não altere suas variáveis de ambiente da Vercel.
+- Não envie .env.local nem JSON de conta de serviço ao GitHub.
+- Não é necessário criar coleções novas manualmente no Firebase.
+
+NOVO SISTEMA DE CONVITE:
+- Quem convida recebe 500 moedas quando o amigo conclui o cadastro.
+- Quem entra pelo convite começa com 3.250 moedas (250 extras).
+- Os dois recebem sugestão para seguir o café um do outro; seguir é opcional.

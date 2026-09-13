@@ -1,49 +1,41 @@
-# CaféVille — Economia e Roadmap inicial
+# Economia e roadmap — CaféVille
 
-## Filosofia
+## Economia atual
 
-O CaféVille começa sem monetização real. A progressão deve vir de jogar, cozinhar, servir, completar objetivos, subir de nível, visitar amigos e participar de eventos.
+- Saldo inicial padrão: **3.000 moedas**.
+- Cadastro por convite: novo jogador recebe **+250 moedas**.
+- Convite convertido: o jogador que convidou recebe **+500 moedas**.
+- Receita e XP continuam controlados pelo backend.
+- Não há venda de moedas ou itens por dinheiro real nesta fase.
 
-## Moedas
+## Sistema social
 
-- Saldo inicial: 3.000.
-- Receitas têm custo e retorno.
-- Level up dá bônus.
-- Missões/eventos darão recompensas.
-- O administrador pode criar promoções e enviar moedas/presentes.
-- Nenhum cliente web consegue alterar diretamente o saldo.
+- Cada jogador possui um código de convite individual.
+- Link: `/cadastro?convite=CODIGO`.
+- Depois da conversão, convidador e convidado recebem sugestão de seguir um ao outro.
+- Seguir é opcional.
+- Ranking e visitas permanecem públicos para usuários autenticados.
 
-## Níveis
+## Roadmap
 
-A v0.2 usa progressão simples para facilitar testes. Antes do lançamento público, a curva deve ficar mais longa e recompensadora.
+### v0.4
+- Loja funcional.
+- Inventário visual.
+- Compra e posicionamento de móveis.
+- Grade isométrica editável.
 
-Sugestão futura:
-- Níveis 1–10: rápidos, ensinam o jogo.
-- 11–25: desbloqueiam equipamentos, temas e receitas.
-- 25: primeira expansão especial.
-- 30–50: coleção e personalização ganham importância.
-- 50+: status, eventos, itens raros e ranking.
+### v0.5
+- Clientes, garçons e chef com movimentação e estados.
+- Pedidos, espera, satisfação e popularidade.
 
-## Administração
+### v0.6
+- Presentes entre jogadores.
+- Mural de recados.
+- Notificações.
+- Curtidas reais.
 
-O administrador poderá evoluir para:
-- pesquisar qualquer jogador;
-- conceder/remover moedas com justificativa;
-- enviar itens exclusivos;
-- lançar presentes globais;
-- configurar eventos;
-- criar receitas;
-- criar móveis e coleções;
-- moderar nomes/mensagens;
-- suspender contas;
-- acompanhar jogadores ativos;
-- consultar economia total do jogo;
-- auditar alterações.
-
-## Social
-
-Cada jogador terá um `@usuario` único. O perfil público não contém e-mail. A comunidade terá busca, amigos, visitas, presentes, curtidas e ranking.
-
-## Nostalgia
-
-A direção é reproduzir a sensação dos jogos sociais de café do início dos anos 2010 — visão isométrica, ciclos de preparo, balcões, clientes, decoração, vizinhos e eventos — sem copiar marca, personagens, artes ou assets de terceiros.
+### v1.0
+- Eventos sazonais.
+- Conquistas.
+- Filial de praia.
+- Ranking semanal e global.

@@ -22,12 +22,21 @@ export default function LoginPage() {
     } finally { setLoading(false); }
   }
 
-  return <main className="auth-shell"><form className="auth-card" onSubmit={submit}>
-    <div className="mini-logo">☕ CaféVille</div><h1>Bem-vindo de volta!</h1><p>Seu café está esperando por você.</p>
-    <label>E-mail<input name="email" type="email" required /></label>
-    <label>Senha<input name="password" type="password" minLength={6} required /></label>
-    {error && <div className="error-box">{error}</div>}
-    <button className="primary-btn" disabled={loading}>{loading ? "Entrando..." : "Entrar no CaféVille"}</button>
-    <p className="auth-foot">Ainda não joga? <Link href="/cadastro">Criar conta</Link></p>
-  </form></main>;
+  return (
+    <main className="cv-auth-page">
+      <section className="auth-visual">
+        <img src="/assets/cafeville-login-reference.png" alt="CaféVille" />
+        <div className="auth-visual-copy"><b>☕ CaféVille</b><span>Cozinhe. Decore. Faça amigos.</span></div>
+      </section>
+      <form className="cv-auth-card" onSubmit={submit}>
+        <div className="auth-brand"><span>☕</span><strong>CaféVille</strong></div>
+        <h1>Que bom te ver!</h1><p>Seu café está esperando por você.</p>
+        <label>E-mail<input name="email" type="email" required /></label>
+        <label>Senha<input name="password" type="password" minLength={6} required /></label>
+        {error && <div className="error-box">{error}</div>}
+        <button className="primary-btn auth-main-btn" disabled={loading}>{loading ? "Entrando..." : "Entrar no CaféVille"}</button>
+        <p className="auth-foot">Ainda não joga? <Link href="/cadastro">Criar meu café</Link></p>
+      </form>
+    </main>
+  );
 }

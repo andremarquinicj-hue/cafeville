@@ -1,4 +1,6 @@
 export const START_COINS = 3000;
+export const INVITER_BONUS = 500;
+export const INVITEE_BONUS = 250;
 
 export const SERVER_RECIPES = {
   espresso: { name: "Café Espresso", cost: 15, revenue: 40, xp: 5, seconds: 15 },

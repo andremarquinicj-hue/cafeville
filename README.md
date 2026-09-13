@@ -1,67 +1,44 @@
-# CaféVille v0.2
+# CaféVille v0.3 — Nostalgia + Social
 
-Base funcional do CaféVille: jogo social de gerenciamento de café inspirado na nostalgia dos jogos sociais de navegador, com identidade própria.
+Versão visual reconstruída a partir do mockup aprovado do CaféVille, com aparência de jogo social de café da era do Orkut e identidade própria.
 
-## Arquitetura desta versão
+## O que entrou na v0.3
 
-- **Next.js / Vercel**: interface + rotas de servidor protegidas.
-- **Firebase Authentication**: cadastro e login por e-mail/senha.
-- **Cloud Firestore**: jogadores, cafés, ranking, preparos e inventário.
-- **Firebase Admin SDK (somente no servidor)**: alterações protegidas de moedas, XP, nível e presentes.
-- **Phaser**: protótipo do restaurante 2D.
+- Tela principal totalmente redesenhada: HUD, barra lateral, cenário, receitas, loja, funcionários, decoração e missões.
+- Cenário visual baseado no conceito aprovado do CaféVille.
+- Login, cadastro e landing page redesenhados.
+- Comunidade com abas de sugestões, seguindo, seguidores e busca de jogadores.
+- Visita ao café de outro jogador com botão Seguir / Deixar de seguir.
+- Ranking redesenhado.
+- Painel administrador redesenhado.
+- Convite por link individual.
+- Jogador que convida ganha **500 moedas** quando o convidado conclui o cadastro.
+- Novo jogador que entra pelo convite ganha **250 moedas extras**, começando com **3.250 moedas**.
+- Após o cadastro, os dois recebem uma sugestão para seguir o café um do outro. Ninguém é seguido automaticamente.
 
-Esta versão não depende de Cloud Functions do Firebase e pode continuar no plano Spark durante o desenvolvimento, respeitando as cotas do Firebase.
+## Como atualizar seu GitHub
 
-## O que já existe
+1. Extraia o ZIP da v0.3.
+2. Substitua os arquivos do repositório `cafeville` pelos arquivos desta pasta.
+3. Faça commit no GitHub.
+4. A Vercel fará o deploy automaticamente.
 
-- Cadastro com e-mail, senha, nome e `@usuario` único.
-- Login individual.
-- Criação automática do jogador com **3.000 moedas**.
-- Perfil privado + perfil público.
-- Café inicial de cada jogador.
-- Livro de receitas.
-- Preparo com cronômetro persistente no Firestore.
-- Servir prato, receber moedas e XP.
-- Level up automático e bônus de moedas.
-- Busca de jogadores por `@usuario`.
-- Visita ao café de outro jogador.
-- Contagem básica de visitas.
-- Ranking por nível e XP.
-- Painel administrativo.
-- Admin pode enviar moedas ou presentes.
-- Log administrativo.
-- Regras do Firestore bloqueiam escrita direta de moedas, XP, nível e inventário.
+As variáveis de ambiente já configuradas na Vercel continuam as mesmas da v0.2.
 
-## Variáveis de ambiente
+## Firebase
 
-Copie `.env.example` para `.env.local` e preencha as 6 variáveis públicas do Firebase Web App.
+Esta versão continua usando Firebase Authentication + Firestore e o backend da Vercel com Firebase Admin.
 
-Para as rotas seguras do servidor, gere uma chave da conta de serviço no Firebase e use apenas estas três variáveis privadas:
+Não é necessário criar coleções manualmente. As novas coleções (`inviteCodes`, `inviteEvents`, `followSuggestions` e `follows`) são criadas pelo backend conforme os jogadores usam os recursos.
 
-```env
-FIREBASE_ADMIN_PROJECT_ID=cafeville-...
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-...@cafeville-....iam.gserviceaccount.com
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n"
-```
+## Regras
 
-**Nunca** coloque essas três variáveis em arquivos enviados ao GitHub. Na Vercel, cadastre-as em **Settings > Environment Variables**.
+O arquivo `firestore.rules` permanece restritivo: dados econômicos e sociais sensíveis são alterados somente pelo backend administrativo.
 
-## Rodar localmente
+## Próxima etapa sugerida
 
-```bash
-npm install
-npm run dev
-```
-
-Abra `http://localhost:3000`.
-
-## Primeiro administrador
-
-1. Cadastre a sua conta normalmente.
-2. Firebase Console > Firestore > `users` > seu UID.
-3. Altere `role` de `player` para `admin`.
-4. Atualize `/admin`.
-
-## Segurança
-
-O navegador não recebe a chave privada da conta de serviço. As rotas em `/api/*` validam o token do Firebase Authentication e usam o Firebase Admin SDK apenas no servidor da Vercel.
+- Compra real de móveis.
+- Arrastar/girar objetos no restaurante.
+- Clientes e garçons com movimentação real.
+- Presentes entre jogadores.
+- Eventos sazonais e conquistas.

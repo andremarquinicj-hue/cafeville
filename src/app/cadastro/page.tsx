@@ -3,14 +3,20 @@
 import { createUserWithEmailAndPassword, deleteUser } from "firebase/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { auth } from "@/lib/firebase";
 import { apiPost } from "@/lib/api";
 
-export default function RegisterPage() {
+export default function CadastroPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [inviteCode, setInviteCode] = useState("");
+
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("convite") || "";
+    setInviteCode(code.trim().toUpperCase());
+  }, []);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,7 +32,7 @@ export default function RegisterPage() {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       created = true;
-      await apiPost("/api/bootstrap", { displayName, username });
+      await apiPost("/api/bootstrap", { displayName, username, inviteCode });
       router.push("/jogo");
     } catch (err: any) {
       if (created && auth.currentUser) {
@@ -44,14 +50,25 @@ export default function RegisterPage() {
     }
   }
 
-  return <main className="auth-shell"><form className="auth-card" onSubmit={submit}>
-    <div className="mini-logo">☕ CaféVille</div><h1>Abra seu café</h1><p>Você começará com <strong>3.000 moedas</strong>.</p>
-    <label>Seu nome<input name="displayName" placeholder="Ex.: André Marquini" minLength={2} required /></label>
-    <label>Usuário<input name="username" placeholder="Ex.: andre.cafe" minLength={3} maxLength={18} pattern="[A-Za-z0-9._-]+" required /></label>
-    <label>E-mail<input name="email" type="email" required /></label>
-    <label>Senha<input name="password" type="password" minLength={6} required /></label>
-    {error && <div className="error-box">{error}</div>}
-    <button className="primary-btn" disabled={loading}>{loading ? "Criando café..." : "Começar a jogar"}</button>
-    <p className="auth-foot">Já tem conta? <Link href="/login">Entrar</Link></p>
-  </form></main>;
+  return (
+    <main className="cv-auth-page">
+      <section className="auth-visual">
+        <img src="/assets/cafeville-login-reference.png" alt="CaféVille" />
+        <div className="auth-visual-copy"><b>☕ CaféVille</b><span>Seu café, mais amigos!</span></div>
+      </section>
+      <form className="cv-auth-card" onSubmit={submit}>
+        <div className="auth-brand"><span>☕</span><strong>CaféVille</strong></div>
+        <h1>Abra seu café</h1>
+        <p>Comece pequeno, cozinhe, decore e faça amigos.</p>
+        {inviteCode && <div className="invite-welcome">🎁 Convite <b>{inviteCode}</b> aplicado! Você começa com <strong>3.250 moedas</strong>.</div>}
+        <label>Seu nome<input name="displayName" placeholder="Ex.: André Marquini" minLength={2} required /></label>
+        <label>Usuário<input name="username" placeholder="Ex.: andre.cafe" minLength={3} maxLength={18} pattern="[A-Za-z0-9._-]+" required /></label>
+        <label>E-mail<input name="email" type="email" required /></label>
+        <label>Senha<input name="password" type="password" minLength={6} required /></label>
+        {error && <div className="error-box">{error}</div>}
+        <button className="primary-btn auth-main-btn" disabled={loading}>{loading ? "Criando seu café..." : "Jogar agora"}</button>
+        <p className="auth-foot">Já tem conta? <Link href="/login">Entrar</Link></p>
+      </form>
+    </main>
+  );
 }
