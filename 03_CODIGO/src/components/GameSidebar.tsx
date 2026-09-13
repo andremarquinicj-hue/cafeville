@@ -1,0 +1,3 @@
+"use client";
+import Icon from './Icon';
+export default function GameSidebar({active,onChange,onInvite}:{active:string;onChange:(key:string)=>void;onInvite:()=>void}){return <aside className="game-rail">{[['book','Receitas','recipes'],['shop','Loja','shop'],['chef','Equipe','staff'],['chair','Decorar','inventory'],['flag','Missões','missions']].map(([icon,label,key])=><button key={key} className={active===key?'active':''} onClick={()=>onChange(key)}><Icon name={icon} size={30}/><span>{label}</span></button>)}<button onClick={onInvite}><Icon name="users" size={30}/><span>Convidar</span></button></aside>;}

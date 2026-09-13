@@ -1,0 +1,1 @@
+export default function Icon({name,size=24}:{name:string;size?:number}){return <img className="game-icon" src={`/assets/game/ui/${name}.svg`} width={size} height={size} alt="" aria-hidden="true" draggable={false}/>;}
