@@ -1,17 +1,51 @@
-CAFÉVILLE v0.3 — COMO ATUALIZAR
+CAFÉVILLE v0.4 — LEIA ANTES DE SUBSTITUIR
 
-1) Extraia o ZIP.
-2) Abra seu repositório cafeville no GitHub.
-3) Substitua o conteúdo atual pelos arquivos desta versão.
-4) Faça Commit changes.
-5) A Vercel fará o deploy automaticamente.
+1. EXTRAIA
+Extraia o ZIP. Abra a pasta cafeville. Dentro dela você deve ver
+package.json, package-lock.json, src, public, firestore.rules e docs.
 
-IMPORTANTE:
-- Não altere suas variáveis de ambiente da Vercel.
-- Não envie .env.local nem JSON de conta de serviço ao GitHub.
-- Não é necessário criar coleções novas manualmente no Firebase.
+2. FIREBASE
+Mantenha o MESMO projeto Firebase e as contas existentes.
+Abra Firebase Console > Firestore Database > Regras.
+Cole TODO o conteúdo de firestore.rules e clique em Publicar.
+Crie os índices descritos em docs/FIREBASE_E_VERCEL.md, ou publique pelo CLI:
 
-NOVO SISTEMA DE CONVITE:
-- Quem convida recebe 500 moedas quando o amigo conclui o cadastro.
-- Quem entra pelo convite começa com 3.250 moedas (250 extras).
-- Os dois recebem sugestão para seguir o café um do outro; seguir é opcional.
+firebase deploy --only firestore:rules,firestore:indexes --project SEU_PROJECT_ID
+
+Espere os índices ficarem prontos antes de entrar no jogo.
+Não apague usuários, coleções, documentos ou saldos.
+
+3. GITHUB
+Na raiz do repositório existente, substitua pelos arquivos DENTRO de cafeville.
+O package.json deve ficar na raiz, não dentro de outra pasta cafeville.
+Inclua public/assets/game, src/game, src/services e package-lock.json.
+O GitHub pode limitar o upload a 100 arquivos por vez; envie as pastas em
+lotes ou use GitHub Desktop. Mantenha a estrutura das pastas.
+O ZIP não contém node_modules nem .next: a Vercel gera essas pastas.
+
+4. VERCEL
+Mantenha as variáveis de ambiente atuais.
+Framework Preset: Next.js.
+Build Command: npm run build.
+Root Directory: a pasta que contém package.json.
+Faça o commit. Se necessário, clique em Redeploy.
+Os nomes das variáveis estão em .env.example e no guia dentro de docs.
+Nunca publique .env.local nem JSON de conta de serviço.
+
+5. PRIMEIRO TESTE
+Abra /demo para conferir o motor e a arte sem precisar fazer login.
+Abra /login e entre com sua conta atual.
+Em /jogo, cozinhe um espresso, recolha e acompanhe o atendimento.
+Teste uma compra e recarregue a página para conferir a persistência.
+Se o perfil não foi finalizado anteriormente, use Concluir meu perfil.
+
+CONVITES
+Quem convida: +500 moedas.
+Novo jogador: 3.000 iniciais +250 de bônus = 3.250.
+O convite não cria amizade automática. Os dois escolhem se querem seguir.
+
+IMPORTANTE
+A compilação e os testes locais estão documentados no pacote.
+O Firebase de produção não está anexado: autenticação, permissões e índices
+precisam ser conferidos no SEU ambiente depois do deploy.
+Leia docs/TESTES.md para fazer essa conferência sem alterar contas reais.

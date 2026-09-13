@@ -1,28 +1,3 @@
 "use client";
-
-const items = [
-  ["🏠", "Loja", "store"],
-  ["📖", "Receitas", "recipes"],
-  ["👨‍🍳", "Funcionários", "staff"],
-  ["🪑", "Decoração", "decor"],
-  ["🎯", "Missões", "missions"],
-] as const;
-
-type Props = { active: string; onChange: (key: string) => void; onInvite: () => void };
-
-export default function GameSidebar({ active, onChange, onInvite }: Props) {
-  return (
-    <aside className="game-sidebar">
-      {items.map(([icon, label, key]) => (
-        <button key={key} className={active === key ? "active" : ""} onClick={() => onChange(key)}>
-          <span className="side-icon">{icon}</span>
-          <span>{label}</span>
-          {key === "missions" && <em>3</em>}
-        </button>
-      ))}
-      <div className="side-spacer" />
-      <button className="friends-btn" onClick={() => location.href = "/comunidade"}><span className="side-icon">🏡</span><span>Visitar amigos</span></button>
-      <button className="invite-btn" onClick={onInvite}><span className="side-icon">🎁</span><span>Convidar</span></button>
-    </aside>
-  );
-}
+import Icon from './Icon';
+export default function GameSidebar({active,onChange,onInvite}:{active:string;onChange:(key:string)=>void;onInvite:()=>void}){return <aside className="game-rail">{[['book','Receitas','recipes'],['shop','Loja','shop'],['chef','Equipe','staff'],['chair','Decorar','inventory'],['flag','Missões','missions']].map(([icon,label,key])=><button key={key} className={active===key?'active':''} onClick={()=>onChange(key)}><Icon name={icon} size={30}/><span>{label}</span></button>)}<button onClick={onInvite}><Icon name="users" size={30}/><span>Convidar</span></button></aside>;}

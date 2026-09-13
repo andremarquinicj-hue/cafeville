@@ -1,7 +1,7 @@
-node_modules
-.next
-.env.local
+node_modules/
+.next/
+.env*
+!.env.example
+*.tsbuildinfo
 firebase-debug.log
-functions/lib
-functions/node_modules
 .DS_Store

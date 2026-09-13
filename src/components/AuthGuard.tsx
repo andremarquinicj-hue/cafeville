@@ -12,6 +12,6 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
 
-  if (loading || !user) return <div className="center-screen"><div className="loader">☕</div><p>Preparando o CaféVille...</p></div>;
+  if (loading || !user) return <div className="center-screen"><div className="loader"></div><p>Preparando o CaféVille...</p></div>;
   return <>{children}</>;
 }

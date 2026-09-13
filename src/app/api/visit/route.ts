@@ -1,41 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { getAdminDb } from "@/lib/firebase-admin";
-import { requireUser } from "@/lib/server-auth";
-
-export const runtime = "nodejs";
-
-export async function POST(req: NextRequest) {
-  try {
-    const auth = await requireUser(req);
-    const body = await req.json();
-    const targetUid = String(body?.targetUid ?? "").trim();
-    if (!targetUid || targetUid === auth.uid) return NextResponse.json({ ok: true });
-
-    const db = getAdminDb();
-    const visitRef = db.doc(`cafes/${targetUid}/visitors/${auth.uid}`);
-    const cafeRef = db.doc(`cafes/${targetUid}`);
-
-    await db.runTransaction(async (tx) => {
-      const [old, cafe] = await Promise.all([tx.get(visitRef), tx.get(cafeRef)]);
-      if (!cafe.exists) throw new Error("CAFE_NOT_FOUND");
-      const last = old.data()?.lastVisitAt?.toMillis?.() ?? 0;
-      const now = Date.now();
-      tx.set(visitRef, {
-        visitorId: auth.uid,
-        lastVisitAt: Timestamp.now(),
-        count: FieldValue.increment(1),
-      }, { merge: true });
-      if (now - last > 6 * 60 * 60 * 1000) {
-        tx.update(cafeRef, { totalVisits: FieldValue.increment(1) });
-      }
-    });
-
-    return NextResponse.json({ ok: true });
-  } catch (error: any) {
-    if (error?.message === "UNAUTHENTICATED") return NextResponse.json({ error: "Faça login para continuar." }, { status: 401 });
-    if (error?.message === "CAFE_NOT_FOUND") return NextResponse.json({ error: "Café não encontrado." }, { status: 404 });
-    console.error("visit", error);
-    return NextResponse.json({ error: "Não foi possível registrar a visita." }, { status: 500 });
-  }
-}
+import { NextRequest,NextResponse } from 'next/server';
+import { FieldValue,Timestamp } from 'firebase-admin/firestore';
+import { requireUser } from '@/lib/server-auth';
+import { getAdminDb } from '@/lib/firebase-admin';
+import { apiError,safeId } from '@/services/server-game';
+import { GameError } from '@/game/core/actions';
+import { periodKeys,resetPeriods,stat } from '@/game/core/state';
+import type { Cafe,Player } from '@/types/game';
+export const runtime='nodejs';
+export async function POST(req:NextRequest){try{
+ const auth=await requireUser(req),a=await req.json(),target=safeId(a.targetUid);if(target===auth.uid)return NextResponse.json({ok:true});
+ const db=getAdminDb(),now=Date.now();await db.runTransaction(async tx=>{
+  const ref=db.doc(`cafes/${target}/visitors/${auth.uid}`),targetRef=db.doc(`cafes/${target}`),myRef=db.doc(`cafes/${auth.uid}`);
+  const [old,other,mine,user]=await Promise.all([tx.get(ref),tx.get(targetRef),tx.get(myRef),tx.get(db.doc(`users/${auth.uid}`))]);if(!other.exists)throw new GameError('Café não encontrado.',404);
+  const day=periodKeys(now).day;if(old.data()?.day===day)return;
+  tx.set(ref,{visitorId:auth.uid,lastVisitAt:Timestamp.fromMillis(now),day,count:FieldValue.increment(1)},{merge:true});tx.update(targetRef,{totalVisits:FieldValue.increment(1)});
+  if(mine.data()?.schemaVersion===4&&user.exists){const c=mine.data() as Cafe,p=user.data() as Player;resetPeriods(c,p,now);stat(c,'visits');c.revision++;tx.set(myRef,c,{merge:true});}
+ });return NextResponse.json({ok:true});
+}catch(e){return apiError(e);}}

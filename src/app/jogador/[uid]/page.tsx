@@ -1,63 +1,20 @@
 "use client";
-
-import AuthGuard from "@/components/AuthGuard";
-import TopBar from "@/components/TopBar";
-import { apiPost } from "@/lib/api";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-
-type Data = { profile: any; cafe: any };
-
-function Visit() {
-  const params = useParams<{ uid: string }>();
-  const uid = params.uid;
-  const [data, setData] = useState<Data | null>(null);
-  const [following, setFollowing] = useState(false);
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    if (!uid) return;
-    (async () => {
-      const [p, c] = await Promise.all([getDoc(doc(db, "publicProfiles", uid)), getDoc(doc(db, "cafes", uid))]);
-      setData({ profile: p.data(), cafe: c.data() });
-      try { await apiPost("/api/visit", { targetUid: uid }); } catch {}
-      try { const status: any = await apiPost("/api/social/status", { targetUid: uid }); setFollowing(!!status.following); } catch {}
-    })();
-  }, [uid]);
-
-  async function toggleFollow() {
-    try {
-      const next = !following;
-      await apiPost("/api/social/follow", { targetUid: uid, action: next ? "follow" : "unfollow" });
-      setFollowing(next);
-      setMessage(next ? "💚 Você agora segue este café." : "Você deixou de seguir este café.");
-    } catch (e:any) { setMessage(e.message); }
-  }
-
-  if (!data?.profile) return <div className="center-screen">☕ Carregando café...</div>;
-  const p = data.profile, c = data.cafe;
-
-  return <div className="cv-app-bg"><TopBar />
-    <main className="visit-shell-v3">
-      <section className="visit-profile-card">
-        <div className="visit-avatar-v3">{p.avatar || "☕"}</div>
-        <div><span className="eyebrow">VISITANDO</span><h1>{c?.name || p.cafeName}</h1><p>de <b>{p.displayName}</b> · @{p.username}</p></div>
-        <div className="visit-stat-stack"><span>⭐ Nível {p.level}</span><span>❤️ {p.popularity}%</span><span>👀 {c?.totalVisits || 0} visitas</span><span>👥 {p.followersCount || 0} seguidores</span></div>
-      </section>
-
-      {message && <div className="visit-message">{message}</div>}
-      <section className="friend-scene-card"><img src="/assets/cafeville-scene.png" alt={`Café de ${p.displayName}`} /><div className="visitor-bubble">👋 Você está visitando!</div></section>
-
-      <section className="visit-action-bar">
-        <button onClick={toggleFollow}>{following ? "✓ Seguindo" : "💚 Seguir café"}</button>
-        <button onClick={() => setMessage("❤️ Você curtiu este café!")}>❤️ Curtir</button>
-        <button onClick={() => setMessage("🎁 Loja de presentes entra na próxima atualização.")}>🎁 Enviar presente</button>
-        <button onClick={() => setMessage("💬 Mural de recados entra na próxima atualização.")}>💬 Mensagem</button>
-      </section>
-    </main>
-  </div>;
+import AuthGuard from '@/components/AuthGuard';
+import TopBar from '@/components/TopBar';
+import CafeGame from '@/components/CafeGame';
+import Icon from '@/components/Icon';
+import { apiPost } from '@/lib/api';
+import { useParams } from 'next/navigation';
+import { useEffect,useState } from 'react';
+import Link from 'next/link';
+import type { GameState } from '@/types/game';
+function Visit(){
+ const {uid}=useParams<{uid:string}>(),[data,setData]=useState<any>(null),[following,setFollowing]=useState(false),[message,setMessage]=useState(''),[text,setText]=useState(''),[busy,setBusy]=useState(false),[inventory,setInventory]=useState<any[]>([]),[gift,setGift]=useState(false);
+ const load=async()=>{const d=await apiPost('/api/social/action',{type:'wall',targetUid:uid});setData(d);};
+ useEffect(()=>{let alive=true;(async()=>{try{const [d,s]=await Promise.all([apiPost('/api/social/action',{type:'wall',targetUid:uid}),apiPost('/api/social/status',{targetUid:uid})]);if(alive){setData(d);setFollowing(s.following);}await apiPost('/api/visit',{targetUid:uid});}catch(e){if(alive)setMessage(e instanceof Error?e.message:'Café indisponível.');}})();return()=>{alive=false;};},[uid]);
+ const action=async(type:string,extra:any={})=>{setBusy(true);try{await apiPost('/api/social/action',{type,targetUid:uid,requestId:crypto.randomUUID(),...extra});setMessage(type==='like'?'Você curtiu este café.':type==='help'?'Mesas limpas! Você ganhou 5 XP.':type==='gift'?'Presente enviado!':'Recado publicado.');setText('');await load();return true;}catch(e){setMessage(e instanceof Error?e.message:'Tente novamente.');return false;}finally{setBusy(false);}};
+ if(!data)return <div className="game-app"><TopBar/><main className="social-page"><h1>{message||'Conhecendo um novo cantinho…'}</h1><Link href="/comunidade">Voltar à comunidade</Link></main></div>;
+ const state:GameState={player:{...data.profile,role:'player',gems:0},cafe:data.cafe,now:data.now,items:data.items,recipes:data.recipes,events:[]};
+ return <div className="game-app"><TopBar/><main className="social-page"><div className="social-title"><div><small>VOCÊ ESTÁ VISITANDO</small><h1>{data.cafe.name}</h1><p>De {data.profile.displayName} · @{data.profile.username} · Nível {data.profile.level}</p></div><Link className="green" href="/jogo">Voltar ao meu café</Link></div><div className="visit-metrics"><span><Icon name="heart"/>{data.profile.popularity}% popularidade</span><span><Icon name="users"/>{data.profile.followersCount||0} seguidores</span><span><Icon name="cup"/>{data.cafe.totalVisits||0} visitas</span></div>{message&&<div className="game-toast" role="status">{message}</div>}<div className="cafe-frame"><CafeGame state={state} bridge={{select:()=>{},move:()=>{},place:()=>{},stove:()=>setMessage('Essa é a cozinha do seu vizinho. Volte ao seu café para cozinhar.'),notice:setMessage}}/></div><div className="visit-buttons"><button disabled={busy} onClick={async()=>{setBusy(true);try{const d=await apiPost('/api/social/follow',{targetUid:uid,action:following?'unfollow':'follow'});setFollowing(d.following);}catch(e){setMessage(e instanceof Error?e.message:'Tente novamente.');}finally{setBusy(false);}}}><Icon name="users"/>{following?'Deixar de seguir':'Seguir café'}</button><button disabled={busy||data.liked} onClick={()=>action('like')}><Icon name="heart"/>{data.liked?'Curtido':'Curtir'} · {data.cafe.likes||0}</button><button disabled={busy} onClick={()=>action('help')}><Icon name="leaf"/>Ajudar na limpeza</button><button disabled={busy} onClick={async()=>{try{const d=await apiPost<GameState>('/api/game',{type:'state'});setInventory(d.cafe.inventory.map(f=>({...f,name:d.items.find(i=>i.id===f.itemId)?.name||f.itemId,art:d.items.find(i=>i.id===f.itemId)?.art})));setGift(true);}catch(e){setMessage(e instanceof Error?e.message:'Tente novamente.');}}}><Icon name="gift"/>Presentear</button></div><section className="wall"><h2>Recadinhos entre cafés</h2><form onSubmit={async e=>{e.preventDefault();await action('message',{text});}}><input value={text} minLength={2} maxLength={300} onChange={e=>setText(e.target.value)} placeholder="Deixe um bom dia para o seu vizinho…" required/><button disabled={busy}>Publicar</button></form>{data.messages.map((m:any)=><article key={m.id}><b>{m.displayName}</b><p>{m.text}</p></article>)}{!data.messages.length&&<p>Seja o primeiro a deixar um recado.</p>}</section></main>{gift&&<div className="cv-modal-backdrop"><section className="cv-modal"><button className="modal-close" onClick={()=>setGift(false)}>×</button><h2>Um presente do seu inventário</h2><p>O item guardado será transferido para o seu vizinho.</p><div className="gift-options">{inventory.map(f=><button disabled={busy} key={f.id} onClick={async()=>{if(await action('gift',{inventoryId:f.id}))setGift(false);}}><img src={f.art} alt=""/>{f.name}</button>)}</div>{!inventory.length&&<p>Seu inventário está vazio. Guarde um móvel ou compre um presente na loja.</p>}</section></div>}</div>;
 }
-
-export default function PlayerPage() { return <AuthGuard><Visit /></AuthGuard>; }
+export default function PlayerPage(){return <AuthGuard><Visit/></AuthGuard>;}

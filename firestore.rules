@@ -1,57 +1,19 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    function isOwner(uid) {
-      return signedIn() && request.auth.uid == uid;
-    }
-
-    function isAdmin() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    match /users/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
-      allow write: if false;
-    }
-
-    match /publicProfiles/{uid} {
-      allow read: if signedIn();
-      allow write: if false;
-    }
-
-    match /usernames/{username} {
-      allow read: if signedIn();
-      allow write: if false;
-    }
-
-    match /cafes/{uid} {
-      allow read: if signedIn();
-      allow write: if false;
-    }
-
-    match /cookJobs/{jobId} {
-      allow read: if signedIn() && resource.data.ownerId == request.auth.uid;
-      allow write: if false;
-    }
-
-    match /inventories/{uid}/items/{itemId} {
-      allow read: if isOwner(uid) || isAdmin();
-      allow write: if false;
-    }
-
-    match /adminLogs/{logId} {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
-
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
+ match /databases/{database}/documents {
+  function signedIn() { return request.auth != null; }
+  function owner(uid) { return signedIn() && request.auth.uid == uid; }
+  function active() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('disabled', false) != true; }
+  function admin() { return active() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'; }
+  match /users/{uid} { allow read: if owner(uid) || admin(); allow write: if false; }
+  match /publicProfiles/{uid} { allow read: if active(); allow write: if false; }
+  match /usernames/{username} { allow read: if active(); allow write: if false; }
+  // The cafe includes simulation, private inventory and progress. Visits use the server API.
+  match /cafes/{uid} { allow read: if owner(uid) || admin(); allow write: if false; }
+  match /cookJobs/{jobId} { allow read: if active() && resource.data.ownerId == request.auth.uid; allow write: if false; }
+  match /inventories/{uid}/items/{itemId} { allow read: if owner(uid) || admin(); allow write: if false; }
+  match /adminLogs/{logId} { allow read: if admin(); allow write: if false; }
+  // No browser writes: balances, XP, inventory, follows, invites and reward receipts are server-owned.
+  match /{document=**} { allow read, write: if false; }
+ }
 }

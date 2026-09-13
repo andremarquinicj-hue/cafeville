@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const targetUid = String(body?.targetUid ?? "").trim();
     const action = body?.action === "unfollow" ? "unfollow" : "follow";
 
-    if (!targetUid || targetUid === auth.uid) return NextResponse.json({ error: "Jogador inválido." }, { status: 400 });
+    if (!/^[a-zA-Z0-9_-]{1,100}$/.test(targetUid) || targetUid === auth.uid) return NextResponse.json({ error: "Jogador inválido." }, { status: 400 });
 
     const db = getAdminDb();
     const followRef = db.doc(`follows/${auth.uid}_${targetUid}`);
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
         tx.get(myPublicRef),
         tx.get(targetPublicRef),
       ]);
-      if (!mySnap.exists || !targetSnap.exists) throw new Error("PLAYER_NOT_FOUND");
+      if (!mySnap.exists || !targetSnap.exists || targetSnap.data()?.disabled) throw new Error("PLAYER_NOT_FOUND");
 
       const myFollowing = Number(mySnap.data()?.followingCount ?? 0);
       const targetFollowers = Number(targetSnap.data()?.followersCount ?? 0);
@@ -40,14 +40,18 @@ export async function POST(req: NextRequest) {
             createdAt: FieldValue.serverTimestamp(),
           });
           tx.update(myPublicRef, { followingCount: myFollowing + 1 });
+          tx.set(db.doc(`users/${auth.uid}`), { followingCount: myFollowing + 1 }, { merge: true });
           tx.update(targetPublicRef, { followersCount: targetFollowers + 1 });
+          tx.set(db.doc(`users/${targetUid}`), { followersCount: targetFollowers + 1 }, { merge: true });
         }
       } else {
         following = false;
         if (followSnap.exists) {
           tx.delete(followRef);
           tx.update(myPublicRef, { followingCount: Math.max(0, myFollowing - 1) });
+          tx.set(db.doc(`users/${auth.uid}`), { followingCount: Math.max(0, myFollowing - 1) }, { merge: true });
           tx.update(targetPublicRef, { followersCount: Math.max(0, targetFollowers - 1) });
+          tx.set(db.doc(`users/${targetUid}`), { followersCount: Math.max(0, targetFollowers - 1) }, { merge: true });
         }
       }
 

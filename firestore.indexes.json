@@ -1,13 +1,16 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "publicProfiles",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "level", "order": "DESCENDING" },
-        { "fieldPath": "xp", "order": "DESCENDING" }
-      ]
-    }
-  ],
-  "fieldOverrides": []
+ "indexes": [
+  {"collectionGroup":"publicProfiles","queryScope":"COLLECTION","fields":[{"fieldPath":"level","order":"DESCENDING"},{"fieldPath":"xp","order":"DESCENDING"}]},
+  {"collectionGroup":"publicProfiles","queryScope":"COLLECTION","fields":[{"fieldPath":"weekKey","order":"ASCENDING"},{"fieldPath":"weekScore","order":"DESCENDING"}]},
+  {"collectionGroup":"cookJobs","queryScope":"COLLECTION","fields":[{"fieldPath":"ownerId","order":"ASCENDING"},{"fieldPath":"status","order":"ASCENDING"}]}
+ ],
+ "fieldOverrides": [
+  {"collectionGroup":"cafes","fieldPath":"sim","indexes":[]},
+  {"collectionGroup":"cafes","fieldPath":"layout","indexes":[]},
+  {"collectionGroup":"cafes","fieldPath":"inventory","indexes":[]},
+  {"collectionGroup":"cafes","fieldPath":"progress","indexes":[]},
+  {"collectionGroup":"cafes","fieldPath":"jobs","indexes":[]},
+  {"collectionGroup":"gameRequests","fieldPath":"before","indexes":[]},
+  {"collectionGroup":"gameRequests","fieldPath":"after","indexes":[]}
+ ]
 }

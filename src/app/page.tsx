@@ -1,22 +1,3 @@
-import Link from "next/link";
-
-export default function Home() {
-  return (
-    <main className="cv-landing">
-      <div className="landing-cloud cloud-a" /><div className="landing-cloud cloud-b" />
-      <section className="landing-card">
-        <div className="landing-left">
-          <img src="/assets/cafeville-login-reference.png" alt="CaféVille" />
-        </div>
-        <div className="landing-right">
-          <div className="landing-logo">☕ <span>CaféVille</span></div>
-          <h1>Seu café.<br />Seus amigos.<br /><em>Sua história.</em></h1>
-          <p>Abra seu restaurante, prepare receitas, decore cada cantinho, suba no ranking e visite cafés de pessoas do Brasil inteiro.</p>
-          <div className="landing-actions"><Link className="primary-btn big" href="/cadastro">Jogar agora</Link><Link className="secondary-btn big" href="/login">Entrar</Link></div>
-          <div className="landing-features"><span>🍳 Cozinhe</span><span>🪑 Decore</span><span>👥 Faça amigos</span><span>🏆 Compita</span></div>
-          <small>Uma experiência social de navegador inspirada na nostalgia dos jogos de café da era do Orkut, com identidade própria.</small>
-        </div>
-      </section>
-    </main>
-  );
-}
+import Link from 'next/link';
+import Icon from '@/components/Icon';
+export default function Home(){return <main className="welcome-page"><header><Link className="game-brand" href="/"><Icon name="chef" size={42}/><span>Café<span>Ville</span></span></Link><Link href="/login">Já tenho um café →</Link></header><section className="welcome-hero"><div><span className="welcome-kicker">UM CANTINHO PARA CHAMAR DE SEU</span><h1>Uma boa receita.<br/>Mil novas histórias.</h1><p>Abra as portas, coloque o café no fogo e receba os amigos. Um jogo de restaurante feito de pequenos cuidados e grandes encontros.</p><div className="welcome-actions"><Link className="green" href="/cadastro">Abrir meu café</Link><Link href="/demo">Experimentar o jogo →</Link></div><small>Grátis para começar · No seu navegador</small></div><figure><img src="/assets/cafeville-scene.png" alt="Conceito visual original do CaféVille"/><figcaption>Cozinhe, decore e faça a vizinhança se sentir em casa.</figcaption></figure></section><section className="welcome-features">{[['chef','Da cozinha para a mesa','Prepare pratos, sirva seus clientes e veja seu café ganhar vida.'],['chair','Do seu jeitinho','Mova cada móvel e transforme um pequeno espaço no café dos seus sonhos.'],['users','Sempre cabe mais um','Visite, ajude e presenteie seus vizinhos. Café bom é café compartilhado.']].map(([icon,title,text])=><article key={icon}><Icon name={icon} size={42}/><h2>{title}</h2><p>{text}</p></article>)}</section><footer>CaféVille · Seu café, seus amigos, sua história.</footer></main>;}

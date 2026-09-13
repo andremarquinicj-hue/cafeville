@@ -8,7 +8,7 @@ async function getProfiles(uids: string[]) {
   const db = getAdminDb();
   const unique = [...new Set(uids)].slice(0, 50);
   const snaps = await Promise.all(unique.map(uid => db.doc(`publicProfiles/${uid}`).get()));
-  return snaps.filter(s => s.exists).map(s => s.data());
+  return snaps.filter(s => s.exists && !s.data()?.disabled).map(s => s.data());
 }
 
 export async function POST(req: NextRequest) {

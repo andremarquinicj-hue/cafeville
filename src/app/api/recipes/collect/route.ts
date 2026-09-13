@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       const user = userSnap.data()!;
 
       if (job.ownerId !== auth.uid) throw new Error("FORBIDDEN");
-      if (job.status === "collected") throw new Error("ALREADY_COLLECTED");
+      if (job.status !== "cooking") throw new Error("ALREADY_COLLECTED");
       if (job.readyAt.toMillis() > Date.now()) throw new Error("NOT_READY");
 
       let level = Number(user.level ?? 1);

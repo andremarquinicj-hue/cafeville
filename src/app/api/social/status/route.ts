@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const auth = await requireUser(req);
     const body = await req.json();
     const targetUid = String(body?.targetUid ?? "").trim();
-    if (!targetUid) return NextResponse.json({ error: "Jogador inválido." }, { status: 400 });
+    if (!/^[a-zA-Z0-9_-]{1,100}$/.test(targetUid)) return NextResponse.json({ error: "Jogador inválido." }, { status: 400 });
     const snap = await getAdminDb().doc(`follows/${auth.uid}_${targetUid}`).get();
     return NextResponse.json({ following: snap.exists });
   } catch (error: any) {
