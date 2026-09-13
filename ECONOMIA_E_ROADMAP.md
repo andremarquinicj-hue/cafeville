@@ -15,7 +15,7 @@ O CaféVille começa sem monetização real. A progressão deve vir de jogar, co
 
 ## Níveis
 
-A v0.1 usa progressão simples para facilitar testes. Antes do lançamento público, a curva deve ficar mais longa e recompensadora.
+A v0.2 usa progressão simples para facilitar testes. Antes do lançamento público, a curva deve ficar mais longa e recompensadora.
 
 Sugestão futura:
 - Níveis 1–10: rápidos, ensinam o jogo.

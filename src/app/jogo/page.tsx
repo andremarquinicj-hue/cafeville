@@ -4,10 +4,10 @@ import AuthGuard from "@/components/AuthGuard";
 import CafeGame from "@/components/CafeGame";
 import TopBar from "@/components/TopBar";
 import { useAuth } from "@/contexts/AuthContext";
-import { db, functions } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
+import { apiPost } from "@/lib/api";
 import { recipes } from "@/lib/recipes";
 import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
-import { httpsCallable } from "firebase/functions";
 import { useEffect, useMemo, useState } from "react";
 
 type Profile = { displayName:string; level:number; xp:number; coins:number; popularity:number; role:string };
@@ -38,15 +38,14 @@ function GameContent() {
   async function cook(recipeId:string) {
     try {
       setMessage("👨‍🍳 Preparando receita...");
-      await httpsCallable(functions, "startRecipe")({ recipeId });
+      await apiPost("/api/recipes/start", { recipeId });
       setMessage("🔥 Receita no fogão! Volte quando estiver pronta.");
     } catch (e:any) { setMessage(`⚠️ ${e.message}`); }
   }
 
   async function collect(jobId:string) {
     try {
-      const result:any = await httpsCallable(functions, "collectRecipe")({ jobId });
-      const data:any = result.data;
+      const data:any = await apiPost("/api/recipes/collect", { jobId });
       setMessage(data.levelReward > 0 ? `🎉 Subiu de nível! Bônus de ${data.levelReward} moedas.` : `🍽️ Prato servido! +${data.coinsGain} moedas.`);
     } catch (e:any) { setMessage(`⚠️ ${e.message}`); }
   }
