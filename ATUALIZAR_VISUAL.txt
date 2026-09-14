@@ -1,0 +1,37 @@
+CAFÉVILLE 0.5 — ATUALIZAÇÃO DE PERSONAGENS E DECORAÇÃO
+
+Para quem já instalou a versão 0.4.
+
+1. Extraia cafeville-atualizacao-visual.zip no computador.
+
+2. Abra a pasta extraída. Lá dentro você deve ver next.config.ts,
+   package.json, package-lock.json e as pastas src, scripts e docs.
+
+3. No GitHub, abra a PÁGINA PRINCIPAL do repositório cafeville,
+   onde aparece o package.json. Clique em Add file > Upload files.
+
+4. Selecione os ARQUIVOS E PASTAS DE DENTRO da pasta extraída e arraste
+   para o GitHub. A pasta que contém tudo fica só no computador.
+   O arquivo next.config.ts precisa substituir o da raiz do repositório.
+   A pasta src precisa juntar seus arquivos com a src que já existe.
+
+5. Clique em Commit changes. Mensagem: CafeVille 0.5 - novo visual.
+
+6. Aguarde o deploy desse commit terminar na Vercel.
+   Abra o jogo e pressione Ctrl + F5.
+
+As imagens são preparadas automaticamente durante o build.
+Este pacote tem menos de 100 arquivos; pode ser enviado de uma vez.
+
+A atualização mantém o café, o inventário, as moedas, o XP e os preparos
+existentes. Não é necessário mudar as configurações do Firebase nem
+publicar regras novas para esta atualização visual.
+
+Como conferir o envio:
+Na página principal do GitHub, next.config.ts e package.json devem estar
+diretamente ao lado da pasta src. Dentro de src/game/art devem aparecer
+atlas.json e nostalgia.ts.
+
+Se já enviou anteriormente pastas chamadas 01_PERSONAGENS, 02_CENARIO
+ou 03_CODIGO, elas não são usadas por esta atualização. Você pode removê-las
+depois, preservando src, public e os demais arquivos corretos da raiz.

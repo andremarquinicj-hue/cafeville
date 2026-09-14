@@ -1,4 +1,26 @@
-# Verificação da entrega 0.4
+# Verificação da entrega 0.5
+
+Verificações da atualização visual realizadas em 14/09/2026:
+
+| Verificação | Resultado |
+|---|---|
+| `npm run typecheck` | Aprovado |
+| `npm run build` | Aprovado; Next.js 15.5.25, páginas e APIs compiladas |
+| `npm test` | 12 testes de lógica aprovados |
+| Recuperação de imagens no build | Toda a pasta `public/assets/game` foi retirada antes de um build limpo; as 110 imagens foram recriadas com bytes idênticos aos originais |
+| Atlas de personagens e móveis | Cinco PNGs com canal alfa real; quadros conferidos na cena, no retrato e nos cartões da interface |
+| Atendimento completo em `/demo` | Espresso preparado, recolhido, servido e pago após a refeição |
+| Edição com as novas imagens | Compra, posicionamento, arraste e rotação conferidos no estado salvo |
+| Persistência local | Mesmo saldo após recarregar a página |
+| Computador e celular | Viewports de 1512×982 e 390×844; sem rolagem horizontal indevida |
+| Páginas e API | Início, login e cadastro renderizados; ação sem autenticação rejeitada com HTTP 401 |
+| Console no fluxo aprovado | Nenhuma exceção JavaScript nem erro de console |
+
+As capturas em `docs/capturas/` foram atualizadas com imagens reais desta versão, incluindo clientes sentados e a edição da decoração. O teste no navegador usou Chromium headless e o servidor de produção.
+
+A atualização mantém o formato dos dados, a chave de persistência da demonstração e as regras de economia e atendimento. As duas novas entradas de catálogo são itens de decoração. As verificações online contra o Firebase do proprietário continuam pendentes, conforme o roteiro no fim deste documento.
+
+## Histórico da entrega 0.4
 
 Verificações realizadas em 13/09/2026, sobre o projeto incluído neste ZIP.
 
@@ -48,6 +70,12 @@ Executada com Chromium headless e o servidor de produção (`npm start`), usando
 Uma falha de renderização do WebGL encontrada nesse ambiente foi corrigida usando o renderizador Canvas do próprio Phaser. A cena continua com câmera, entrada, sprites e ciclo de atualização do Phaser 3.
 
 Capturas reais da demonstração estão em `docs/capturas/`: restaurante, atendimento, edição e celular. Elas mostram a implementação entregue, sem montagem de interface.
+
+### Correção de recuperação das artes
+
+Após o relato de imagens ausentes no deploy, `next.config.ts` passou a restaurar as 105 artes básicas antes do build, caso estejam ausentes ou vazias. Para verificar a correção, toda a pasta `public/assets/game` foi movida temporariamente para fora do projeto e `npm run build` foi executado novamente: o build terminou e os 105 arquivos foram recriados com os mesmos bytes dos originais.
+
+Também foram conferidos: preservação de imagem personalizada existente, recuperação de arquivo vazio no desenvolvimento e nenhuma criação de arquivo ao carregar a configuração na fase de servidor de produção. Depois do build, o servidor de produção respondeu HTTP 200 com tipo SVG para as 105 imagens; a demonstração abriu no Chromium sem imagens HTML quebradas ou erros JavaScript.
 
 ## Conferência necessária no Firebase do proprietário
 

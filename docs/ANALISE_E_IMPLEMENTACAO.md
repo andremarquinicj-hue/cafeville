@@ -1,4 +1,4 @@
-# Análise da base e entrega 0.4
+# Análise da base e entregas 0.4 / 0.5
 
 ## O que existia na v0.3
 
@@ -38,16 +38,20 @@ Foram revisados os arquivos do ZIP original: configuração, documentos, página
 
 ## Limites explícitos desta entrega
 
-1. **Arte:** os novos sprites são originais e vetoriais. A imagem conceitual anexada é uma referência de linguagem visual, não um conjunto de sprites recortados. O resultado não é pixel a pixel igual ao mockup. Alguns móveis simétricos compartilham a mesma aparência em orientações opostas.
+1. **Arte:** na v0.5, os personagens e móveis são ilustrações PNG originais organizadas em atlas; os SVGs continuam como compatibilidade e em elementos da interface. A imagem conceitual anexada é uma referência de linguagem visual, não um conjunto de sprites recortados. O resultado não é pixel a pixel igual ao mockup. Alguns móveis simétricos compartilham a mesma aparência em orientações opostas.
 2. **Offline:** preparos avançam mesmo com o site fechado; não há vendas automáticas durante ausências longas. Ao voltar, pedidos incompletos são descartados sem pagamento e as porções reservadas são restituídas. Isso evita vender sem mostrar atendimento e limita a carga da Vercel.
 3. **Filiais:** tipos de filial e limiares constam no catálogo e no modelo, mas somente o café principal é jogável. Praia, montanha e internacional não estão liberados.
 4. **Funcionários futuros:** atendente, ajudante e gerente não estão implementados como NPCs contratáveis.
 5. **Eventos:** o admin cria período, objetivo de clientes na semana, recompensas e associa item/receita. Não há campanhas de Natal/Halloween já publicadas nem mapas exclusivos. O objetivo considera a semana corrente, inclusive atendimentos anteriores à abertura do evento.
 6. **Moeda especial:** é concedida ao subir de nível. Não há compra por dinheiro real nem loja premium nesta versão.
-7. **Animações:** sprites de caminhada e poses/efeitos leves por estado; não há o volume de animações de um jogo comercial com equipe de arte dedicada.
+7. **Animações:** quatro quadros de caminhada para cada um dos nove personagens, seis poses sentadas e efeitos leves por estado; não há o volume de animações de um jogo comercial com equipe de arte dedicada.
 8. **Escala:** a simulação é por jogador, em requisições periódicas, com um documento de café. Isso é adequado ao início do produto; alta concorrência exige revisão de frequência/custos, filas e separação de documentos. Não há promessa de escala ilimitada.
 9. **Verificação online:** testes de produção exigem as configurações Firebase/Vercel do proprietário. Nenhuma conta real foi criada ou alterada durante a entrega.
 
 ## Economia e balanceamento
 
 Mantidos 3.000 de início e bônus de convite. O pão de queijo usa o exemplo solicitado: custo 30, 20 porções × 4 moedas, 10 XP e 30 segundos. Valores e duração dos demais pratos pertencem ao CaféVille. Vender móveis devolve 40% do preço atual do catálogo. As expansões e receitas são desbloqueadas pelo nível. Não há monetização real.
+
+## Atualização visual 0.5
+
+As artes básicas do restaurante foram substituídas na apresentação por ilustrações mais expressivas, com rostos, cabelos, vestimentas, contornos e materiais detalhados. A integração usa cinco atlas PNG transparentes, compartilhados entre Phaser e os componentes da loja/inventário/admin. Os IDs e URLs legados são resolvidos por `src/game/art/nostalgia.ts`, preservando os dados salvos. O arquivo `next.config.ts` inclui o pacote de imagens para que um envio incompleto de public não impeça o deploy.

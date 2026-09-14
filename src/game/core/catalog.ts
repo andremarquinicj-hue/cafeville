@@ -16,6 +16,7 @@ export const ITEMS:Item[] = [
  def('cadeira_bistro','Cadeira bistrô','chair',120),def('fogao_classico','Fogão clássico','stove',600),def('fogao_dourado','Fogão dourado','stove',2400,6),
  def('balcao_madeira','Balcão de madeira','counter',450),def('geladeira','Geladeira creme','fridge',800,2),
  def('planta_verde','Costela-de-adão','plant',180),def('luminaria','Luminária âmbar','lamp',350,2),def('sofa_verde','Sofá do jardim','sofa',900,4,2,1),
+ def('cadeira_azul','Cadeira Riviera','chair',260,2),def('vaso_flores','Floreira de gerânios','plant',360,2),
  def('piso_madeira','Madeira de mel','floor',250,1,1,1,'#d8ae78'),def('piso_creme','Ladrilho creme','floor',400,2,1,1,'#e6d6b2'),def('piso_verde','Ladrilho sálvia','floor',500,3,1,1,'#a5b695'),
  def('parede_creme','Parede baunilha','wall',250,1,1,1,'#f5e4ba'),def('parede_verde','Parede jardim','wall',450,3,1,1,'#b5c8a3'),def('porta_madeira','Entrada de madeira','door',350),def('janela_azul','Janela ensolarada','window',280),
  def('tema_jardim','Tema Jardim','theme',1500,5,1,1,'#71965a'),def('tema_outono','Tema Outono','theme',1500,5,1,1,'#b88447'),

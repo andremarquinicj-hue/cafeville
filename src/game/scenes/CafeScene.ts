@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import type { GameState,Furniture,Point,Cafe } from '@/types/game';
 import { iso,fromIso,entry,position,motionEnd,cells,validLayout } from '@/game/core/grid';
 import { advance } from '@/game/core/simulation';
+import { ART_SHEETS,ART_FRAMES,artFrameKey,furnitureSize } from '@/game/art/nostalgia';
 export type SceneBridge={select:(id:string)=>void;move:(id:string,x:number,y:number)=>void;place:(x:number,y:number)=>void;stove:(id:string)=>void;notice:(message:string)=>void};
 export class CafeScene extends Phaser.Scene {
  state!:GameState; bridge!:SceneBridge; editing=false; selected=''; placing=''; previewRotation=0;
@@ -9,10 +10,13 @@ export class CafeScene extends Phaser.Scene {
  private dishes=new Map<string,Phaser.GameObjects.Image>();private confirmedCoins=0;private confirmedLevel=1;private environment:Phaser.GameObjects.GameObject[]=[];private markers=new Map<string,Phaser.GameObjects.Text>();private backgroundKey='';private offset=0;private pointerStart:Point|null=null;private panStart:Point={x:0,y:0};private dragged='';private moved=false;private lastPinch=0;private lastSim=0;private objectKey='';private isReady=false;
  constructor(state:GameState,bridge:SceneBridge){super('CafeScene');this.state=structuredClone(state);this.bridge=bridge;this.offset=state.now-Date.now();this.confirmedCoins=state.player.coins;this.confirmedLevel=state.player.level;}
  preload(){
+  for(const sheet of Object.values(ART_SHEETS))this.load.image(sheet.key,sheet.url);
+  this.load.svg('mood-heart','/assets/game/ui/heart.svg');
   for(const url of [...new Set([...this.state.items.map(i=>i.art),...this.state.recipes.map(r=>r.art)])])this.load.svg(url,url);
   for(const role of ['chef','waiter','cleaner',...Array.from({length:6},(_,n)=>`guest${n}`),...Array.from({length:6},(_,n)=>`guest${n}-seat`)])for(let f=0;f<4;f++)this.load.svg(`${role}-${f}`,`/assets/game/characters/${role}-${f}.svg`);
  }
  create(){
+  for(const [name,frame]of Object.entries(ART_FRAMES)){const sheet=ART_SHEETS[frame.sheet];if(this.textures.exists(sheet.key))this.textures.get(sheet.key).add(name,0,frame.x,frame.y,frame.w,frame.h);}
   this.world=this.add.container(0,0);this.ghosts=this.add.graphics().setDepth(100000);this.isReady=true;
   this.input.addPointer(1);this.cameras.main.setBackgroundColor('#a9bd86');this.drawEnvironment();this.drawProps();this.fit();
   this.scale.on('resize',()=>this.fit());
@@ -41,7 +45,7 @@ export class CafeScene extends Phaser.Scene {
  setState(state:GameState){const oldLevel=this.confirmedLevel,diff=state.player.coins-this.confirmedCoins;this.confirmedLevel=state.player.level;this.confirmedCoins=state.player.coins;this.state=structuredClone(state);this.offset=state.now-Date.now();if(!this.isReady)return;this.drawEnvironment();this.drawProps();if(state.player.level>oldLevel)this.confetti();if(diff>0){const point=iso(entry(state.cafe.size).x,entry(state.cafe.size).y);const text=this.add.text(point.x,point.y-50,`+${Math.floor(diff)}`,{fontFamily:'Georgia',fontSize:'26px',color:'#fff0a8',stroke:'#826032',strokeThickness:4}).setOrigin(.5).setDepth(12000);this.tweens.add({targets:text,y:text.y-80,alpha:0,duration:2200,onComplete:()=>text.destroy()});}}
  setMode(editing:boolean,selected:string,placing:string,rotation=0){this.editing=editing;this.selected=selected;this.placing=placing;this.previewRotation=rotation;this.objectKey='';if(this.isReady){this.drawProps();if(!editing)this.ghosts.clear();}}
  zoomBy(factor:number){this.cameras.main.setZoom(Phaser.Math.Clamp(this.cameras.main.zoom*factor,.45,2.8));}
- fit(){if(!this.isReady)return;const c=this.cameras.main,n=this.state.cafe.size;const width=n*76+180,height=n*38+230;c.setZoom(Math.min(c.width/width,c.height/height)*.95);c.centerOn(0,(n*38-155)/2);}
+ fit(){if(!this.isReady)return;const c=this.cameras.main,n=this.state.cafe.size;const width=n*76+180,height=n*38+205;c.setZoom(Math.min(c.width/width,c.height/height)*.95);c.centerOn(0,(n*38-155)/2);}
  private polygon(g:Phaser.GameObjects.Graphics,points:Point[],fill:number,line=0x876647,alpha=1){g.fillStyle(fill,alpha);g.fillPoints(points,true);g.lineStyle(1,line,.3);g.strokePoints(points,true);}
  private drawEnvironment(){
   const cafe=this.state.cafe,k=JSON.stringify([cafe.size,cafe.styles]);if(k===this.backgroundKey)return;this.backgroundKey=k;
@@ -86,6 +90,8 @@ export class CafeScene extends Phaser.Scene {
   for(const [id,s]of this.props)if(!this.state.cafe.layout.some(f=>f.id===id)){s.destroy();this.props.delete(id);}
   for(const f of this.state.cafe.layout){const item=this.state.items.find(i=>i.id===f.itemId);if(!item)continue;const w=f.rotation%2?item.height:item.width,h=f.rotation%2?item.width:item.height;const p=iso(f.x+(w-1)/2,f.y+(h-1)/2);
    let sprite=this.props.get(f.id);if(!sprite){sprite=this.add.image(p.x,p.y,item.art).setOrigin(.5,.92).setDisplaySize(item.width>1?139:92,item.width>1?111:109).setData('furnitureId',f.id).setInteractive({pixelPerfect:true,alphaTolerance:24,useHandCursor:true});this.props.set(f.id,sprite);}
+   const key=artFrameKey(item.art,item.id),art=key?ART_FRAMES[key]:undefined;
+   if(art&&this.textures.exists(ART_SHEETS[art.sheet].key)){const dimensions=furnitureSize(item.kind,art,item.width>1);sprite.setTexture(ART_SHEETS[art.sheet].key,key).setOrigin(art.ox,art.oy).setDisplaySize(dimensions.width,dimensions.height);}
    sprite.setPosition(p.x,p.y).setDepth((f.x+f.y)*100+10).setFlipX(f.rotation%2===1).setAlpha(1);if(this.editing&&f.id===this.selected)sprite.setTint(0xffe8aa);else sprite.clearTint();
   }
  }
@@ -94,32 +100,48 @@ export class CafeScene extends Phaser.Scene {
   for(const p of cells(proposed,this.state.items)){const points=[iso(p.x-.5,p.y-.5),iso(p.x+.5,p.y-.5),iso(p.x+.5,p.y+.5),iso(p.x-.5,p.y+.5)];this.polygon(this.ghosts,points,error?0xd56850:0x7ba45e,0xffffff,.6);}
  }
  private label(id:string,x:number,y:number,text:string,color='#fff7db'){
-  let t=this.markers.get(id);if(!t){t=this.add.text(x,y,text,{fontFamily:'Trebuchet MS',fontSize:'12px',color,backgroundColor:'#4c6046',padding:{x:7,y:4}}).setOrigin(.5,1).setDepth(8000);this.markers.set(id,t);}t.setPosition(x,y).setText(text).setColor(color);
+  let t=this.markers.get(id);if(!t){t=this.add.text(x,y,text,{fontFamily:'Trebuchet MS',fontSize:'11px',color,backgroundColor:'#4c6046',padding:{x:6,y:3}}).setOrigin(.5,1).setDepth(8000);this.markers.set(id,t);}t.setPosition(x,y).setText(text).setColor(color);
  }
  private confetti(){for(let i=0;i<35;i++){const x=this.cameras.main.midPoint.x+(Math.random()-.5)*400,y=this.cameras.main.midPoint.y-140;const s=this.add.circle(x,y,3,[0xf7cc6c,0xe79869,0x93b677][i%3]).setDepth(12000);this.tweens.add({targets:s,y:y+300,x:x+(Math.random()-.5)*160,alpha:0,duration:1800+Math.random()*800,onComplete:()=>s.destroy()});}}
  update(){
   if(!this.isReady)return;const now=Date.now()+this.offset;
   if(now-this.lastSim>200){advance(this.state.cafe,this.state.player,now,this.state.items);this.lastSim=now;}
-  const active=new Set<string>(),labels=new Set<string>(),foods=new Set<string>(),c=this.state.cafe;
+  const active=new Set<string>(),labels=new Set<string>(),foods=new Set<string>(),moods=new Set<string>(),c=this.state.cafe;
   const dish=(id:string,art:string,x:number,y:number,depth:number,size=38)=>{foods.add(id);let sprite=this.dishes.get(id);if(!sprite){sprite=this.add.image(x,y,art).setDisplaySize(size,size);this.dishes.set(id,sprite);}sprite.setTexture(art).setPosition(x,y).setDepth(depth);};
-  const person=(id:string,role:string,motion:import('@/types/game').Motion,state:string,tableId='',carrying=false)=>{
-   active.add(id);const pt=position(motion,now),p=iso(pt.x,pt.y),walking=now<motionEnd(motion),frame=walking?Math.floor(now/140)%4:0;
-   let s=this.people.get(id);if(!s){s=this.add.image(p.x,p.y,`${role}-0`).setOrigin(.5,.94).setDisplaySize(44,66);this.people.set(id,s);}
-   const bob=walking?Math.sin(now/70)*1.4:state==='cooking'||state==='cleaning'?Math.sin(now/180)*1.1:0;
-   s.setTexture(`${role}${role.startsWith('guest')&&(state==='waiting'||state==='eating')?'-seat':''}-${frame}`).setPosition(p.x,p.y+(state==='waiting'||state==='eating'?-8:0)+bob).setDepth((pt.x+pt.y)*100+65);
-   const idx=Math.min(motion.path.length-1,Math.floor(Math.max(0,(now-motion.startedAt)/motion.stepMs))),a=motion.path[idx],b=motion.path[Math.min(idx+1,motion.path.length-1)];if(a&&b&&a.x!==b.x||a&&b&&a.y!==b.y)s.setFlipX(iso((b?.x||0)-(a?.x||0),(b?.y||0)-(a?.y||0)).x<0);
-   if(state==='waiting'){this.label(`mood-${id}`,p.x,p.y-72,'•••');labels.add(`mood-${id}`);}else if(state==='eating'){this.label(`mood-${id}`,p.x,p.y-70,'Bom apetite','#f9e5af');labels.add(`mood-${id}`);}else if(state==='leaving'){this.label(`mood-${id}`,p.x,p.y-70,tableId==='happy'?'Obrigado!':'Sem atendimento',tableId==='happy'?'#e8f5c4':'#ffc3a5');labels.add(`mood-${id}`);}
-   if(carrying){this.label(`tray-${id}`,p.x+15,p.y-34,'Prato');labels.add(`tray-${id}`);}
+  const mood=(id:string,x:number,y:number,kind:string)=>{
+   moods.add(id);let bubble=this.bubbles.get(id);
+   if(bubble&&bubble.getData('kind')!==kind){bubble.destroy();this.bubbles.delete(id);bubble=undefined;}
+   if(!bubble){const panel=this.add.graphics().fillStyle(0xfff9e9,.96).lineStyle(1.4,0xc8ad7c).fillRoundedRect(-14,-12,28,22,8).strokeRoundedRect(-14,-12,28,22,8);panel.fillTriangle(-4,8,3,8,-3,15);
+    const icon=kind==='happy'?this.add.image(0,-1,'mood-heart').setDisplaySize(15,15):this.add.text(0,-2,kind==='sad'?'!':'•••',{fontFamily:'Arial',fontSize:kind==='sad'?'16px':'11px',fontStyle:'bold',color:kind==='sad'?'#bb613c':'#756141'}).setOrigin(.5);
+    bubble=this.add.container(x,y,[panel,icon]).setDepth(9000).setData('kind',kind);this.bubbles.set(id,bubble);
+   }bubble.setPosition(x,y);
   };
-  for(const g of c.sim.customers){person(g.id,`guest${g.avatar}`,g.motion,g.state,g.happy?'happy':'sad');if(g.state==='eating'&&g.art){const table=c.layout.find(f=>f.id===g.tableId);if(table){const p=iso(table.x,table.y);dish(`plate-${g.id}`,g.art,p.x+10,p.y-49,(table.x+table.y)*100+50,34);}}}
+  const person=(id:string,role:string,motion:import('@/types/game').Motion,state:string,reaction='',table?:Point)=>{
+   active.add(id);const pt=position(motion,now),p=iso(pt.x,pt.y),walking=now<motionEnd(motion),frame=walking?Math.floor(now/160)%4:0,seated=role.startsWith('guest')&&(state==='waiting'||state==='eating');
+   const key=seated?`${role}-seat`:`${role}-${frame}`,art=ART_FRAMES[key];
+   let s=this.people.get(id);if(!s){s=this.add.image(p.x,p.y,`${role}-0`);this.people.set(id,s);}
+   const height=seated?92:role==='chef'?96:90;
+   if(art&&this.textures.exists(ART_SHEETS[art.sheet].key))s.setTexture(ART_SHEETS[art.sheet].key,key).setOrigin(art.ox,art.oy).setDisplaySize(height*art.w/art.h,height);
+   else s.setTexture(`${role}${seated?'-seat':''}-${frame}`).setOrigin(.5,.94).setDisplaySize(44,66);
+   const bob=walking?Math.sin(now/80)*.7:state==='cooking'||state==='cleaning'?Math.sin(now/180)*.7:0;
+   s.setPosition(p.x,p.y+(seated?4:0)+bob).setDepth((pt.x+pt.y)*100+65);
+   const idx=Math.min(motion.path.length-1,Math.floor(Math.max(0,(now-motion.startedAt)/motion.stepMs))),a=motion.path[idx],b=motion.path[Math.min(idx+1,motion.path.length-1)];
+   if(seated&&table)s.setFlipX(iso(table.x-pt.x,table.y-pt.y).x<0);
+   else if(a&&b&&(a.x!==b.x||a.y!==b.y))s.setFlipX(iso(b.x-a.x,b.y-a.y).x<0);
+   if(state==='waiting')mood(id,p.x,p.y-height-9,'waiting');
+   else if(state==='eating')mood(id,p.x,p.y-height-9,'happy');
+   else if(state==='leaving')mood(id,p.x,p.y-height-9,reaction);
+  };
+  for(const g of c.sim.customers){person(g.id,`guest${g.avatar}`,g.motion,g.state,g.happy?'happy':'sad',c.layout.find(f=>f.id===g.tableId));if(g.state==='eating'&&g.art){const table=c.layout.find(f=>f.id===g.tableId);if(table){const p=iso(table.x,table.y);dish(`plate-${g.id}`,g.art,p.x+10,p.y-49,(table.x+table.y)*100+50,34);}}}
   for(const w of c.sim.workers){person(w.role,w.role,w.motion,w.state);if(w.carrying){const pos=position(w.motion,now),p=iso(pos.x,pos.y);dish(`tray-${w.role}`,w.carrying.art,p.x+17,p.y-32,(pos.x+pos.y)*100+70,27);}}
   for(const [id,s]of this.people)if(!active.has(id)){s.destroy();this.people.delete(id);}
   for(const f of c.layout){const p=iso(f.x,f.y),job=c.jobs.find(j=>j.stoveId===f.id),stock=c.counters[f.id];
-   if(job){const text=now>=job.spoilsAt?'Limpar':now>=job.readyAt?'Pronto!':`${Math.ceil((job.readyAt-now)/1000)}s`;this.label(f.id,p.x,p.y-96,text,now>=job.spoilsAt?'#ffb695':'#fff1c8');labels.add(f.id);}
+   if(job){const text=now>=job.spoilsAt?'Limpar':now>=job.readyAt?'Pronto!':`${Math.ceil((job.readyAt-now)/1000)}s`;this.label(f.id,p.x,p.y-110,text,now>=job.spoilsAt?'#ffb695':'#fff1c8');labels.add(f.id);}
    if(stock?.portions>0){dish(`counter-${f.id}`,stock.art,p.x,p.y-57,(f.x+f.y)*100+40,41);this.label(`stock-${f.id}`,p.x,p.y-76,`${stock.portions} porções`);labels.add(`stock-${f.id}`);}
    if(c.dirty[f.id]){this.label(`dirty-${f.id}`,p.x,p.y-84,'Limpeza');labels.add(`dirty-${f.id}`);}
   }
   for(const [id,s]of this.dishes)if(!foods.has(id)){s.destroy();this.dishes.delete(id);}
+  for(const [id,bubble]of this.bubbles)if(!moods.has(id)){bubble.destroy();this.bubbles.delete(id);}
   for(const [id,t]of this.markers)if(!labels.has(id)){t.destroy();this.markers.delete(id);}
  }
 }

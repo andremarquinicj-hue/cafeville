@@ -1,4 +1,8 @@
-CAFÉVILLE v0.4 — LEIA ANTES DE SUBSTITUIR
+CAFÉVILLE v0.5 — INSTALAÇÃO COMPLETA
+
+Se a versão 0.4 já funciona no seu site, use ATUALIZAR_VISUAL.txt.
+A atualização visual não exige novas regras ou índices do Firebase.
+Este roteiro completo também atende quem ainda está na versão 0.3.
 
 1. EXTRAIA
 Extraia o ZIP. Abra a pasta cafeville. Dentro dela você deve ver
